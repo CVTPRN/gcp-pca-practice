@@ -108,7 +108,13 @@ const rows = [
  ['operations','Eset: a felhasználók lassulást tapasztalnak, de az átlag CPU alacsony. Mely két jel segít elsőként?',['Kérés késleltetés és hibaarány metrikái','Elosztott trace-ek','A gépnév hossza','Csak havi számla'],[0,1],'Felhasználóközeli mutatók és trace-ek pontosítják a hibakeresést.','monitoring',true],
  ['operations','Eset: egy új release után romlik az SLO. Mi a megfelelő első működési lépés?',['Riasztás és kiadás összevetése, majd szükség szerint rollback','Várni napokig mérés nélkül','Naplózás letiltása','Vakon több VM-et indítani'],[0],'A release és a hibajel együtt vizsgálható, szükség esetén visszaállítással.','slos',true]
 ];
-export const QUESTIONS = rows.map((r,i)=>({id:`PCA-${String(i+1).padStart(3,'0')}`,topic:r[0],prompt:r[1],options:r[2],answer:r[3],explanation:r[4],source:SOURCES[r[5]],caseStudy:!!r[6]}));
+export const QUESTIONS = rows.map((r,i)=>{
+  const offset=(i*7+1)%4;
+  return {id:`PCA-${String(i+1).padStart(3,'0')}`,topic:r[0],prompt:r[1],
+    options:r[2].map((_,j)=>r[2][(j-offset+4)%4]),
+    answer:r[3].map(j=>(j+offset)%4).sort((a,b)=>a-b),
+    explanation:r[4],source:SOURCES[r[5]],caseStudy:!!r[6]};
+});
 export const REFERENCE = [
  {title:'Alapok és architektúra',items:[['PCA','Professional Cloud Architect'],['GCP','Google Cloud Platform'],['VPC','Virtual Private Cloud'],['IAM','Identity and Access Management'],['HA','High Availability'],['DR','Disaster Recovery'],['RTO','Recovery Time Objective'],['RPO','Recovery Point Objective'],['SLI','Service Level Indicator'],['SLO','Service Level Objective'],['SLA','Service Level Agreement'],['KPI','Key Performance Indicator'],['ROI','Return on Investment'],['IaC','Infrastructure as Code'],['CI/CD','Continuous Integration / Continuous Delivery'],['CAPEX','Capital Expenditure'],['OPEX','Operational Expenditure']],source:GUIDE},
  {title:'Hálózat',items:[['PSC','Private Service Connect'],['PSA','Private Services Access'],['PGA','Private Google Access'],['NAT','Network Address Translation'],['VPN','Virtual Private Network'],['BGP','Border Gateway Protocol'],['DNS','Domain Name System'],['CIDR','Classless Inter-Domain Routing'],['TCP','Transmission Control Protocol'],['UDP','User Datagram Protocol'],['HTTP','Hypertext Transfer Protocol'],['HTTPS','Hypertext Transfer Protocol Secure'],['TLS','Transport Layer Security'],['IP','Internet Protocol'],['LB','Load Balancer'],['CDN','Content Delivery Network'],['IAP','Identity-Aware Proxy']],source:SOURCES.psc},
