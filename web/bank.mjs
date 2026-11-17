@@ -2,8 +2,17 @@
 // Public practice material informs the expanded scenarios; it is never copied verbatim.
 import {BASE_ROWS} from './base-questions.mjs';
 import {ADVANCED_ROWS} from './advanced-questions.mjs';
+import {DEEP_ROWS} from './deep-questions.mjs';
+import {CASE_ROWS} from './case-questions.mjs';
 export const GUIDE = 'https://services.google.com/fh/files/misc/professional_cloud_architect_exam_guide_english.pdf';
 export const CERT = 'https://cloud.google.com/learn/certification/cloud-architect';
+export const CASE_STUDIES = [
+ {name:'EHR Healthcare',url:'https://services.google.com/fh/files/misc/v6.1_pca_ehr_healthcare_case_study_english.pdf'},
+ {name:'Altostrat Media',url:'https://services.google.com/fh/files/misc/v6.1_pca_altostrat_media_case_study_english.pdf'},
+ {name:'Cymbal Retail',url:'https://services.google.com/fh/files/misc/v6.1_pca_cymbal_retail_case_study_english.pdf'},
+ {name:'KnightMotives Automotive',url:'https://services.google.com/fh/files/misc/v6.1_pca_knightmotives_automotive_case_study_english.pdf'}
+];
+export const EXAM_DOMAIN_COUNTS={design:12,infrastructure:9,security:9,process:8,implementation:6,operations:6};
 export const TOPICS = [
   {id:'design',name:'Design and planning',weight:'~25%',icon:'◈',description:'Requirements, tradeoffs, service selection, availability, and migration.'},
   {id:'infrastructure',name:'Infrastructure and networking',weight:'~17.5%',icon:'⌘',description:'VPC, hybrid connectivity, storage, compute, and AI platforms.'},
@@ -50,14 +59,29 @@ const SOURCES={
 };
 
 // [topic, question, options, correct option indices, explanation, documentation key, case-study flag]
-const rows = [...BASE_ROWS, ...ADVANCED_ROWS];
+const rows = [...BASE_ROWS, ...ADVANCED_ROWS, ...DEEP_ROWS, ...CASE_ROWS];
 export const QUESTIONS = rows.map((r,i)=>{
   const offset=(i*7+1)%4;
+  const caseName=r[8]||CASE_STUDIES.find(c=>r[1].startsWith(c.name+':')||r[7]===c.url)?.name||null;
   return {id:`PCA-${String(i+1).padStart(3,'0')}`,topic:r[0],prompt:r[1],
     options:r[2].map((_,j)=>r[2][(j-offset+4)%4]),
     answer:r[3].map(j=>(j+offset)%4).sort((a,b)=>a-b),
-    explanation:r[4],source:SOURCES[r[5]],caseStudy:!!r[6],research:r[7]||null};
+    explanation:r[4],source:SOURCES[r[5]],caseStudy:!!r[6],caseName,research:r[7]||null,
+    tier:i<BASE_ROWS.length?'foundation':i<BASE_ROWS.length+ADVANCED_ROWS.length?'advanced':'scenario'};
 });
+function shuffled(items,rng=Math.random){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+export function selectExamIds(rng=Math.random){
+ const names=shuffled(CASE_STUDIES.map(c=>c.name),rng).slice(0,2);
+ const chosen=names.flatMap(name=>shuffled(QUESTIONS.filter(q=>q.caseName===name),rng).slice(0,6));
+ const selected=new Set(chosen.map(q=>q.id));
+ for(const [domain,target] of Object.entries(EXAM_DOMAIN_COUNTS)){
+  const remaining=target-chosen.filter(q=>q.topic===domain).length;
+  const pool=QUESTIONS.filter(q=>q.topic===domain&&!q.caseStudy&&q.tier!=='foundation'&&!selected.has(q.id));
+  for(const q of shuffled(pool,rng).slice(0,remaining)){chosen.push(q);selected.add(q.id);}
+ }
+ if(chosen.length!==50)throw Error(`Exam pool is insufficient: ${chosen.length}/50`);
+ return shuffled(chosen,rng).map(q=>q.id);
+}
 export const REFERENCE = [
  {title:'Architecture fundamentals',items:[['PCA','Professional Cloud Architect'],['GCP','Google Cloud Platform'],['VPC','Virtual Private Cloud'],['IAM','Identity and Access Management'],['HA','High Availability'],['DR','Disaster Recovery'],['RTO','Recovery Time Objective'],['RPO','Recovery Point Objective'],['SLI','Service Level Indicator'],['SLO','Service Level Objective'],['SLA','Service Level Agreement'],['KPI','Key Performance Indicator'],['ROI','Return on Investment'],['IaC','Infrastructure as Code'],['CI/CD','Continuous Integration / Continuous Delivery'],['CAPEX','Capital Expenditure'],['OPEX','Operational Expenditure']],source:GUIDE},
  {title:'Networking',items:[['PSC','Private Service Connect'],['PSA','Private Services Access'],['PGA','Private Google Access'],['NAT','Network Address Translation'],['VPN','Virtual Private Network'],['BGP','Border Gateway Protocol'],['DNS','Domain Name System'],['CIDR','Classless Inter-Domain Routing'],['TCP','Transmission Control Protocol'],['UDP','User Datagram Protocol'],['HTTP','Hypertext Transfer Protocol'],['HTTPS','Hypertext Transfer Protocol Secure'],['TLS','Transport Layer Security'],['IP','Internet Protocol'],['LB','Load Balancer'],['CDN','Content Delivery Network'],['IAP','Identity-Aware Proxy']],source:SOURCES.psc},
@@ -78,3 +102,4 @@ export const FACTS = [
  {label:'Cloud Storage Coldline minimum',value:'90 days',note:'Early deletion charges may apply',source:SOURCES.storage},
  {label:'Cloud Storage Archive minimum',value:'365 days',note:'Early deletion charges may apply',source:SOURCES.storage}
 ];
+
