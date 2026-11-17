@@ -1,4 +1,4 @@
-import {QUESTIONS, TOPICS, REFERENCE, FACTS, GUIDE, CERT, CASE_STUDIES, selectExamIds} from './bank.mjs';
+import {QUESTIONS, TOPICS, REFERENCE, FACTS, GUIDE, CERT, CASE_STUDIES, selectExamIds} from './bank.mjs?v=20261117-2';
 
 const main=document.querySelector('#main');
 const notice=document.querySelector('#notice');
