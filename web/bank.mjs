@@ -3,7 +3,7 @@
 import {BASE_ROWS} from './base-questions.mjs';
 import {ADVANCED_ROWS} from './advanced-questions.mjs';
 import {DEEP_ROWS} from './deep-questions.mjs';
-import {CASE_ROWS} from './case-questions.mjs';
+import {CASE_ROWS} from './case-questions.mjs?v=20261117-2';
 export const GUIDE = 'https://services.google.com/fh/files/misc/professional_cloud_architect_exam_guide_english.pdf';
 export const CERT = 'https://cloud.google.com/learn/certification/cloud-architect';
 export const CASE_STUDIES = [
